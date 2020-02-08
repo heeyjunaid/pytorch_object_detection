@@ -29,7 +29,7 @@ class PascalVocDataset(object):
         #get all anotation files
         self.xml_file = [x for x in os.listdir(root) if x.endswith(".xml")] 
         #label emcoder
-        self.label_encoder = {"ripen": 0, "unripen": 1}
+        self.label_encoder = {"paper": 0, "plastic": 1, "metal": 2, "glass": 3}
         
         
     def __getitem__(self, idx):
@@ -84,7 +84,8 @@ class PascalVocDataset(object):
 
 if __name__ == "__main__":
 
-    root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
+    #root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
+    root = "E:/BE Project/Recycle_data/data"
     dataset = PascalVocDataset(root, None)
 
     img, target = dataset[0]

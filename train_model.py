@@ -6,10 +6,9 @@ import utils
 
 
 
-def main(root, num_classes, num_epochs):
+def main(root, num_classes, num_epochs, batch_size, backbone = None):
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
@@ -22,14 +21,14 @@ def main(root, num_classes, num_epochs):
     dataset_test = torch.utils.data.Subset(dataset_test, indices[-50:])
 
     # define training and validation data loaders
-    data_loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=True
+    data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True
                                             ,collate_fn=utils.collate_fn)
 
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, shuffle=False,
                                             collate_fn=utils.collate_fn)
 
     # get the model using our helper function
-    model = get_model(num_classes, "mobilenet")
+    model = get_model(num_classes, backbone)
 
     # move model to the right device
     model.to(device)
@@ -56,5 +55,7 @@ def main(root, num_classes, num_epochs):
 
 if __name__ == "__main__":
 
-    root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
-    main(root, 2, 50)
+    #root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
+    root = "E:/BE Project/Recycle_data/data"
+
+    main(root, 4, 50, 5)
