@@ -22,14 +22,17 @@ class PascalVocDataset(object):
 
     Note: target format is like this{'boxes': [N, 4], labels: [N]}
     '''
-    def __init__(self, root, transforms,):
+    def __init__(self, root, transforms,data = "r"):
         self.root = root
         self.transforms = transforms
 
         #get all anotation files
         self.xml_file = [x for x in os.listdir(root) if x.endswith(".xml")] 
+
+        label_dict = {"f": {"apple": 1, "banana": 2, "orange": 3}, "r": {"paper": 1, "plastic": 2, "metal": 3, "glass": 4}, "t": {"ripen": 1, "unripen": 2} }
+
         #label emcoder
-        self.label_encoder = {"paper": 0, "plastic": 1, "metal": 2, "glass": 3}
+        self.label_encoder = label_dict[data]
         
         
     def __getitem__(self, idx):
