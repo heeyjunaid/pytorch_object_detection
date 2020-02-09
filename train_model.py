@@ -9,8 +9,6 @@ import utils
 def main(root, num_classes, num_epochs, batch_size, backbone = None):
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    # our dataset has two classes only - background and person
-    num_classes = 2
     # use our dataset and defined transformations
     dataset = PascalVocDataset(root, get_transform(train=True))
     dataset_test = PascalVocDataset(root, get_transform(train=False))
@@ -48,6 +46,8 @@ def main(root, num_classes, num_epochs, batch_size, backbone = None):
         # evaluate on the test dataset
         evaluate(model, data_loader_test, device=device)
 
+    #load model to cpu
+    model = model.to(torch.device("cpu"))
     #save model
     torch.save(model, "./model.pth")
     print("That's it!")
@@ -58,4 +58,4 @@ if __name__ == "__main__":
     #root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
     root = "E:/BE Project/Recycle_data/data"
 
-    main(root, 4, 50, 5)
+    main(root, 4, 50, 1)
