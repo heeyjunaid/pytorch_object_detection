@@ -2,6 +2,7 @@ import torch
 from prepare_dataset import PascalVocDataset
 from prepare_train import get_model, get_transform
 from engine import train_one_epoch, evaluate
+from ped_dataset import PennFudanDataset
 import utils
 
 
@@ -10,8 +11,16 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None)
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # use our dataset and defined transformations
-    dataset = PascalVocDataset(root, get_transform(train=True), data)
-    dataset_test = PascalVocDataset(root, get_transform(train=False))
+    
+    #dataset = PascalVocDataset(root, get_transform(train=True), data)
+    #dataset_test = PascalVocDataset(root, get_transform(train=False), data)
+
+    if data == "ped":
+        dataset = PennFudanDataset(root, get_transform(train=True))
+        dataset_test = PennFudanDataset(root, get_transform(train=False))
+    else:
+        dataset = PascalVocDataset(root, get_transform(train=True), data = data)
+        dataset_test = PascalVocDataset(root, get_transform(train=False), data= data )
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
@@ -56,6 +65,8 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None)
 if __name__ == "__main__":
 
     #root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
-    root = "E:/BE Project/Recycle_data/data"
+    #root = "E:/BE Project/Recycle_data/data"
+    #root = "E:/BE Project/Fruits Data/train_zip/fruits_data/"
+    root = "D:/Datasets/PennFudanPed"
 
-    main(root, 4, 50, 1, data = "r")
+    main(root, 3, 10, 1, data = "f")

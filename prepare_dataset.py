@@ -4,11 +4,13 @@ import torch
 from PIL import Image
 import pandas as pd
 import xml.etree.ElementTree as ET
+import torch.utils.data
+
 
 
 #FIXME: Add support for coco dataset.
 
-class PascalVocDataset(object):
+class PascalVocDataset(torch.utils.data.Dataset):
     '''
     This function is used to generate a Dataset class for the PascalVoc format dataset.
 
@@ -30,10 +32,10 @@ class PascalVocDataset(object):
         self.xml_file = [x for x in os.listdir(root) if x.endswith(".xml")] 
 
         self.data = data
-        label_dict = {"f": {"apple": 1, "banana": 2, "orange": 3}, "r": {"paper": 1, "plastic": 2, "metal": 3, "glass": 4}, "t": {"ripen": 1, "unripen": 2} }
+        self.label_dict = {"f": {"apple": 1, "banana": 2, "orange": 3}, "r": {"paper": 1, "plastic": 2, "metal": 3, "glass": 4}, "t": {"ripen": 1, "unripen": 2} }
 
         #label emcoder
-        self.label_encoder = label_dict[self.data]
+        self.label_encoder = {"apple": 1, "banana": 2, "orange": 3}
         
         
     def __getitem__(self, idx):
