@@ -35,7 +35,7 @@ class PascalVocDataset(torch.utils.data.Dataset):
         self.label_dict = {"f": {"apple": 1, "banana": 2, "orange": 3}, "r": {"paper": 1, "plastic": 2, "metal": 3, "glass": 4}, "t": {"ripen": 1, "unripen": 2} }
 
         #label emcoder
-        self.label_encoder = {"apple": 1, "banana": 2, "orange": 3}
+        self.label_encoder = self.label_dict[self.label_dict]
         
         
     def __getitem__(self, idx):
