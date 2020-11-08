@@ -4,10 +4,11 @@ from prepare_train import get_model, get_transform
 from engine import train_one_epoch, evaluate
 from ped_dataset import PennFudanDataset
 import utils
+import os
 
 
 
-def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None):
+def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None, save_model_path = "./trained_model.pth"):
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # use our dataset and defined transformations
@@ -49,6 +50,8 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None)
     # and a learning rate scheduler
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
+    if not os.path.exists("./checkpoints"):
+        os.makedirs("./checkpoints")
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
@@ -57,11 +60,17 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None)
         lr_scheduler.step()
         # evaluate on the test dataset
         evaluate(model, data_loader_test, device=device)
-
+        
+        #load model to cpu
+        model = model.to(torch.device("cpu"))
+        training_checkpoint_path = f"./checkpoints/training_checkpoint_{epoch}/{num_epochs}.pth"
+        #save model
+        torch.save(model, )
+        
     #load model to cpu
     model = model.to(torch.device("cpu"))
     #save model
-    torch.save(model, "./scrap_model.pth")
+    torch.save(model, save_model_path)
     print("That's it!")
 
 
