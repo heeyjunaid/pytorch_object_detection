@@ -32,7 +32,8 @@ class PascalVocDataset(torch.utils.data.Dataset):
         self.xml_file = [x for x in os.listdir(root) if x.endswith(".xml")] 
 
         self.data = data
-        self.label_dict = {"f": {"apple": 1, "banana": 2, "orange": 3}, "r": {"paper": 1, "plastic": 2, "metal": 3, "glass": 4}, "t": {"ripen": 1, "unripen": 2}, "nt":{"1":1, "2":2, "3":3} }
+        self.label_dict = {"f": {"apple": 1, "banana": 2, "orange": 3}, "r": {"paper": 1, "plastic": 2, "metal": 3, "glass": 4}, "t": {"ripen": 1, "unripen": 2},
+                             "nt":{"1":1, "2":2, "3":3}, "photoshop": {"splicing":1, "remove":2} }
 
         #label emcoder
         self.label_encoder = self.label_dict[self.data]
@@ -90,9 +91,9 @@ class PascalVocDataset(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
 
-    root = "E:/BE Project/code/tomato_data_preprocessing/tomato_preprocessed/"
+    root = "E:/Projects/2020/FreeLancing/Raedd/Explainer/Resources/dataset/Dataset/final_localization_data"
     #root = "E:/BE Project/Recycle_data/data"
-    dataset = PascalVocDataset(root,  None, data = "nt")
+    dataset = PascalVocDataset(root,  None, data = "photoshop")
 
     img, target = dataset[0]
     print(np.shape(img))

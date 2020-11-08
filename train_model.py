@@ -22,10 +22,12 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None)
         dataset = PascalVocDataset(root, get_transform(train=True), data = data)
         dataset_test = PascalVocDataset(root, get_transform(train=False), data= data )
 
+    print("preparing dataset....")
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
     dataset = torch.utils.data.Subset(dataset, indices[:-50])
     dataset_test = torch.utils.data.Subset(dataset_test, indices[-50:])
+    print("Done.")
 
     # define training and validation data loaders
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True
@@ -37,6 +39,7 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None)
     # get the model using our helper function
     model = get_model(num_classes, backbone)
 
+    print(model)
     # move model to the right device
     model.to(device)
 
@@ -58,7 +61,7 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None)
     #load model to cpu
     model = model.to(torch.device("cpu"))
     #save model
-    torch.save(model, "./model.pth")
+    torch.save(model, "./scrap_model.pth")
     print("That's it!")
 
 
@@ -67,6 +70,8 @@ if __name__ == "__main__":
     #root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
     #root = "E:/BE Project/Recycle_data/data"
     #root = "E:/BE Project/Fruits Data/train_zip/fruits_data/"
-    root = "D:/Datasets/PennFudanPed"
-
-    main(root, 3, 10, 1, data = "f")
+    #root = "D:/Datasets/PennFudanPed"
+    
+    #root = "D:/Datasets/Scrap"
+    root = "E:/Projects/2020/FreeLancing/Raedd/Explainer/Resources/dataset/Dataset/final_localization_data"
+    main(root, 2, 10, 1, data = "photoshop")
