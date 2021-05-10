@@ -1,22 +1,20 @@
 import os
-import numpy as np
+import json
 import torch
+import numpy as np
 from PIL import Image
-import pandas as pd
-import xml.etree.ElementTree as ET
 import torch.utils.data
 
 
 
-#FIXME: Add support for coco dataset.
-
-class PascalVocDataset(torch.utils.data.Dataset):
+class CustomDataset(torch.utils.data.Dataset):
     '''
     This function is used to generate a Dataset class for the PascalVoc format dataset.
 
     Input:
         1. root(str):          root dir/ dataset dir.
         2. transforms(torchvision.transforms): transforms list to be applied on given image.
+        3. label_mapping_dict(dictionary): dictionary mapping for labels
 
     Output:
         1.img(torch.tensor):    tensor containg transformed image.
@@ -24,19 +22,16 @@ class PascalVocDataset(torch.utils.data.Dataset):
 
     Note: target format is like this{'boxes': [N, 4], labels: [N]}
     '''
-    def __init__(self, root, transforms,data = "r"):
+    def __init__(self, root, transforms, label_mapping_dict = {}, ignore_list = []):
         self.root = root
         self.transforms = transforms
 
         #get all anotation files
-        self.xml_file = [x for x in os.listdir(root) if x.endswith(".xml")] 
-
-        self.data = data
-        self.label_dict = {"f": {"apple": 1, "banana": 2, "orange": 3}, "r": {"paper": 1, "plastic": 2, "metal": 3, "glass": 4}, "t": {"ripen": 1, "unripen": 2},
-                             "nt":{"1":1, "2":2, "3":3}, "photoshop": {"splicing":1, "remove":2} }
+        self.json_file = [x for x in os.listdir(root) if x.endswith(".json")] 
 
         #label emcoder
-        self.label_encoder = self.label_dict[self.data]
+        self.label_encoder = label_mapping_dict
+        self.ignore_list = ignore_list
         
         
     def __getitem__(self, idx):
@@ -44,29 +39,35 @@ class PascalVocDataset(torch.utils.data.Dataset):
             This function returns image and targets for for file at given index
         '''
 
-        xml_name = self.xml_file[idx]
-        xml_tree = ET.parse(os.path.join(self.root, xml_name))
-        xml_root = xml_tree.getroot()
+        json_name = self.json_file[idx]
+        json_path = os.path.join(self.root, json_name)
 
-        img_path = os.path.join(self.root, xml_root[1].text)
+        with open(json_path) as f:
+            json_file = json.load(f)
+
+        annotation = json_file["annotation"]
+
+        img_path = os.path.join(self.root, annotation["filename"])
         img = Image.open(img_path).convert("RGB")               #load img in rgb format
 
         #get all objects
-        objects = [child for child in xml_root if child.tag == "object"]
+        objects = annotation["objects"]
 
         label_list = []
         bnd_box_list = []
 
         #iterate over all objects
         for object_ in objects:
-            xmin = int(object_[4][0].text)
-            ymin = int(object_[4][1].text)
-            xmax = int(object_[4][2].text)
-            ymax = int(object_[4][3].text)
+            #don't added bounding boxes of ignored classes.
+            if object_["name"] not in self.ignore_list: 
+                xmin = object_["bndbox"]["xmin"]
+                ymin = object_["bndbox"]["ymin"]
+                xmax = object_["bndbox"]["xmax"]
+                ymax = object_["bndbox"]["ymax"]
 
-            #append to list
-            label_list.append(self.label_encoder[object_[0].text])      #get encoded label name
-            bnd_box_list.append([xmin, ymin, xmax, ymax])
+                #append to list
+                label_list.append(self.label_encoder[object_["name"]])      #get encoded label name
+                bnd_box_list.append([xmin, ymin, xmax, ymax])
 
         # convert everything into a torch.Tensor
         boxes = torch.as_tensor(bnd_box_list, dtype=torch.float32)
@@ -86,14 +87,17 @@ class PascalVocDataset(torch.utils.data.Dataset):
         return img, target
             
     def __len__(self):
-        return len(self.xml_file)
+        return len(self.json_file)
 
 
 if __name__ == "__main__":
 
-    root = "E:/Projects/2020/FreeLancing/Raedd/Explainer/Resources/dataset/Dataset/final_localization_data"
+    label_mapping = {'chair':1, 'door':2, 'sofa':3, 'table':4, 'bed':5, 'cupboard':6, 'stool':7}
+    ignore_list = ["cupboard", "stool", "bed"] #ignore this classes from database
+
+    root = "E:/02 Neurithm/03 BOSH Hackathon/02 Data/04 MIT Indoor scene/formated_data"
     #root = "E:/BE Project/Recycle_data/data"
-    dataset = PascalVocDataset(root,  None, data = "photoshop")
+    dataset = CustomDataset(root,  None, label_mapping, ignore_list)
 
     img, target = dataset[0]
     print(np.shape(img))

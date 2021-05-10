@@ -1,14 +1,13 @@
 import torch
-from prepare_dataset import PascalVocDataset
+from dataset import PascalVocDataset, PennFudanDataset, CustomDataset
 from prepare_train import get_model, get_transform
 from engine import train_one_epoch, evaluate
-from ped_dataset import PennFudanDataset
 import utils
 import os
 
 
 
-def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None, save_model_path = "./trained_model.pth"):
+def main(root, num_classes, num_epochs, batch_size, label_mapping_dict ={}, backbone = None, save_model_path = "./trained_model.pth", save_checkpoints = False, ignore_list=[], data="custom"):
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # use our dataset and defined transformations
@@ -19,9 +18,12 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None,
     if data == "ped":
         dataset = PennFudanDataset(root, get_transform(train=True))
         dataset_test = PennFudanDataset(root, get_transform(train=False))
+    elif data == "custom":
+        dataset = CustomDataset(root, get_transform(train=True), label_mapping_dict)
+        dataset_test = CustomDataset(root, get_transform(train=False),label_mapping_dict)
     else:
-        dataset = PascalVocDataset(root, get_transform(train=True), data = data)
-        dataset_test = PascalVocDataset(root, get_transform(train=False), data= data )
+        dataset = PascalVocDataset(root, get_transform(train=True), label_mapping_dict, ignore_list)
+        dataset_test = PascalVocDataset(root, get_transform(train=False), label_mapping_dict, ignore_list)
 
     print("preparing dataset....")
     # split the dataset in train and test set
@@ -40,7 +42,6 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None,
     # get the model using our helper function
     model = get_model(num_classes, backbone)
 
-    print(model)
     # move model to the right device
     model.to(device)
 
@@ -61,11 +62,13 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None,
         # evaluate on the test dataset
         evaluate(model, data_loader_test, device=device)
         
-        #load model to cpu
-        model = model.to(torch.device("cpu"))
-        training_checkpoint_path = f"./checkpoints/training_checkpoint_{epoch}/{num_epochs}.pth"
-        #save model
-        torch.save(model, )
+        if save_checkpoints:
+            #load model to cpu
+            save_model = model.to(torch.device("cpu"))
+            training_checkpoint_path = f"./checkpoints/training_checkpoint_{epoch}/{num_epochs}.pth"
+            #save model
+            torch.save(save_model, training_checkpoint_path)
+
         
     #load model to cpu
     model = model.to(torch.device("cpu"))
@@ -76,11 +79,8 @@ def main(root, num_classes, num_epochs, batch_size, data = "r", backbone = None,
 
 if __name__ == "__main__":
 
-    #root = "E:/BE Project/code/tomato_data_preprocessing/tomato_img_5mp/"
-    #root = "E:/BE Project/Recycle_data/data"
-    #root = "E:/BE Project/Fruits Data/train_zip/fruits_data/"
-    #root = "D:/Datasets/PennFudanPed"
-    
-    #root = "D:/Datasets/Scrap"
-    root = "E:/Projects/2020/FreeLancing/Raedd/Explainer/Resources/dataset/Dataset/final_localization_data"
-    main(root, 2, 10, 1, data = "photoshop")
+    root = "E:/02 Neurithm/03 BOSH Hackathon/03 Code/01 FasterRCNN/pytorch_object_detection/other_utils/clean_data"
+    label_mapping = {'chair':1, 'door':2, 'sofa':3, 'table':4, 'bed':5, 'cupboard':6, 'stool':7}
+    ignore_list = ["cupboard", "stool", "bed"]
+
+    main(root, 6, 1, 1, label_mapping, ignore_list=ignore_list)
