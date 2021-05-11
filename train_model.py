@@ -19,11 +19,11 @@ def main(root, num_classes, num_epochs, batch_size, label_mapping_dict ={}, back
         dataset = PennFudanDataset(root, get_transform(train=True))
         dataset_test = PennFudanDataset(root, get_transform(train=False))
     elif data == "custom":
-        dataset = CustomDataset(root, get_transform(train=True), label_mapping_dict)
-        dataset_test = CustomDataset(root, get_transform(train=False),label_mapping_dict)
+        dataset = CustomDataset(root, get_transform(train=True), label_mapping_dict, ignore_list)
+        dataset_test = CustomDataset(root, get_transform(train=False),label_mapping_dict, ignore_list)
     else:
-        dataset = PascalVocDataset(root, get_transform(train=True), label_mapping_dict, ignore_list)
-        dataset_test = PascalVocDataset(root, get_transform(train=False), label_mapping_dict, ignore_list)
+        dataset = PascalVocDataset(root, get_transform(train=True), label_mapping_dict)
+        dataset_test = PascalVocDataset(root, get_transform(train=False), label_mapping_dict)
 
     print("preparing dataset....")
     # split the dataset in train and test set
