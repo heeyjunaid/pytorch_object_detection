@@ -7,7 +7,16 @@ import os
 
 
 
-def main(root, num_classes, num_epochs, batch_size, label_mapping_dict ={}, backbone = None, save_model_path = "./trained_model.pth", save_checkpoints = False, ignore_list=[], data="custom"):
+def main(root, num_classes, num_epochs, batch_size, label_mapping_dict ={}, backbone = None, save_model_path = "./trained_model.pth", save_checkpoints = False, ignore_list=[], data="custom", load_model_path = ""):
+    """
+        Arguments:
+            load_model_path (string): load model from given path for retraining. 
+        
+        Known Issue: 
+            for retraining model, currently need load whole model. state dict and optimzer state restoration not yet supported.
+            TODO: Add load state dict support.
+            TODO: Add Optimizer state resume support
+    """
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # use our dataset and defined transformations
@@ -39,8 +48,14 @@ def main(root, num_classes, num_epochs, batch_size, label_mapping_dict ={}, back
     data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, shuffle=False,
                                             collate_fn=utils.collate_fn)
 
-    # get the model using our helper function
-    model = get_model(num_classes, backbone)
+    if not load_model_path:
+        # get the model using our helper function
+        model = get_model(num_classes, backbone)
+    else:
+        if os.path.exists(load_model_path):
+            model = torch.load(load_model_path)
+        else:
+            print("model path: {} does not exists".format(load_model_path))
 
     # move model to the right device
     model.to(device)

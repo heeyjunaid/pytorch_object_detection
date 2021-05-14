@@ -1,12 +1,8 @@
-.vscode/settings.json
 other_utils/clean_data/*
-__pycache__/coco_utils.cpython-39.pyc
-__pycache__/engine.cpython-39.pyc
-__pycache__/prepare_train.cpython-39.pyc
-__pycache__/transforms.cpython-39.pyc
+__pycache__/*
 dataset/__pycache__/__init__.cpython-39.pyc
 dataset/__pycache__/custom_dataset.cpython-39.pyc
 dataset/__pycache__/pascal_voc_dataset.cpython-39.pyc
 dataset/__pycache__/ped_dataset.cpython-39.pyc
-.vscode/settings.json
-.vscode/settings.json
+notebooks/*
+.vscode/*
